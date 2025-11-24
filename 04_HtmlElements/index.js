@@ -14,31 +14,88 @@ function pageLoaded() {
   btn.addEventListener("click", () => {
     calculate();
   });
+
+  // validate on input events
+  if (txt1) txt1.addEventListener("input", () => validateAndMark(txt1));
+  if (txt2) txt2.addEventListener("input", () => validateAndMark(txt2));
   lblRes = document.getElementById("lblRes");
+
+  const btn2 = document.getElementById("btn2");
+  if (btn2)
+    btn2.addEventListener("click", () => {
+      print("btn2 clicked :" + btn2.id + "|" + btn2.innerText);
+    });
 }
 
 function calculate() {
+  // validate inputs
+  const valid1 = validateAndMark(txt1);
+  const valid2 = validateAndMark(txt2);
+
+  if (!valid1 || !valid2) {
+    lblRes.innerText = "Invalid input";
+    print("Calculation aborted: invalid input", true);
+    return;
+  }
+
   let txt1Text = txt1.value;
-  let num1 = parseInt(txt1Text);
+  let num1 = parseFloat(txt1Text);
 
   let txt2Text = txt2.value;
-  let num2 = parseInt(txt2Text);
+  let num2 = parseFloat(txt2Text);
 
-  let res = num1 + num2;
+  let op = document.getElementById("dropdown").value;
+
+  switch (op) {
+    case "+":
+      res = num1 + num2;
+      break;
+    case "-":
+      res = num1 - num2;
+      break;
+    case "*":
+      res = num1 * num2;
+      break;
+    case "/":
+      res = num1 / num2;
+      break;
+    default:
+      res = NaN;
+  }
+
   lblRes.innerText = res;
+
+  print(`Calculated: ${num1} ${op} ${num2} = ${res}`, true);
 }
 
-const btn2 = document.getElementById("btn2");
-btn2.addEventListener("click", () => {
-  print("btn2 clicked :" + btn2.id + "|" + btn2.innerText);
-});
+// =============================================
+// VALIDATION HELPERS
+// =============================================
+function isNumberString(s) {
+  if (typeof s !== "string") return false;
+  s = s.trim();
+  if (s.length === 0) return false;
+  return /^[-+]?\d+(\.\d+)?$/.test(s);
+}
+
+function validateAndMark(el) {
+  if (!el) return false;
+  const val = el.value;
+  const ok = isNumberString(val);
+  el.classList.remove("is-valid", "is-invalid");
+  if (ok) el.classList.add("is-valid");
+  else el.classList.add("is-invalid");
+  return ok;
+}
 // =============================================
 // HELPER: PRINT TO TEXTAREA
 // =============================================
-function print(msg) {
+function print(msg, append = false) {
   const ta = document.getElementById("output");
-  if (ta) ta.value = msg;
-  else console.log(msg);
+  if (ta) {
+    if (append) ta.value += "\n" + msg;
+    else ta.value = msg;
+  } else console.log(msg);
 }
 
 // =============================================
